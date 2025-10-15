@@ -1,30 +1,33 @@
 import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
-export default function App() {
-  const [message, setMessage] = React.useState<string>("Loading...");
-  const apiBaseUrl =
-    (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
-
-  React.useEffect(() => {
-    fetch(`${apiBaseUrl}/`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setMessage(data?.message ?? "OK");
-      })
-      .catch((err) => setMessage(`Error: ${err.message}`));
-  }, [apiBaseUrl]);
-
-  return (
-    <div
-      style={{
-        padding: 24,
-        fontFamily: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif",
-      }}
-    >
-      <h1>Frontend ↔ Backend check</h1>
-      <p>GET / from backend: {message}</p>
-    </div>
-  );
+function PrivateRoute({ children }: { children: React.ReactElement }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
 }
 
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
