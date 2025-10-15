@@ -9,4 +9,11 @@ generator client {
     provider = "prisma-client-js"
 }
 
-// Initial empty schema. Add models as needed.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
